@@ -1,0 +1,11 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/checkstyle-idea.xml
+/uiDesigner.xml
+/misc.xml
+/externalDependencies.xml
+/gradle.xml
+/jarRepositories.xml
+/codeStyles/codeStyleConfig.xml
+/modules/complexity-reducer.main.iml
