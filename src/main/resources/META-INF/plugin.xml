@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.brownian.plugins.intellij.complexity</id>
     <name>Complexity reducer</name>
-    <vendor email="jack.brown.255@gmail.com">JJ Brown</vendor>
+    <vendor email="jack.brown.255+brownian-motion@gmail.com">JJ Brown</vendor>
 
     <description>
         Provides tools for reducing complexity of Java methods,
