@@ -30,7 +30,7 @@ public class ComplexityLineMarkerInfo<T extends PsiElement> extends MergeableLin
 
     @NotNull
     private static TextIcon getIcon(int complexity) {
-        TextIcon textIcon = new TextIcon("C " + getComplexityText(complexity), getForeground(complexity), getBackground(complexity), 2);
+        TextIcon textIcon = new TextIcon(getComplexityText(complexity), getForeground(complexity), getBackground(complexity), 2);
         textIcon.setFont(new Font(null, Font.PLAIN, /* TODO: get editor font size */ 12));
         textIcon.setRound(3);
         return textIcon;
