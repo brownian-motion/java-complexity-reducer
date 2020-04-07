@@ -17,6 +17,9 @@
         <!-- Add your extensions here -->
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.brownian.plugins.intellij.complexity.markers.CyclomaticComplexityLineMarker"/>
+
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.brownian.plugins.intellij.complexity.markers.NPathComplexityLineMarker"/>
     </extensions>
 
     <actions>

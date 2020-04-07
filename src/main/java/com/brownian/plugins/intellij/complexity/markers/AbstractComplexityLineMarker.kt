@@ -3,12 +3,12 @@ package com.brownian.plugins.intellij.complexity.markers
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
 import com.intellij.psi.*
+import org.jetbrains.annotations.Nls
 
-abstract class AbstractComplexityLineMarker<T : JavaElementVisitor>(
-    val visitorSupplier: () -> T,
-    val complexityGetter: T.() -> Int
+abstract class AbstractComplexityLineMarker(
+    @Nls(capitalization = Nls.Capitalization.Title) val complexityType: String
 ) : LineMarkerProviderDescriptor() {
-    override fun getName(): String? = "Cyclomatic complexity line marker"
+    override fun getName(): String? = "$complexityType line marker"
 
     override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
         val parent = element.parent
@@ -29,11 +29,10 @@ abstract class AbstractComplexityLineMarker<T : JavaElementVisitor>(
             ) {
                 return getComplexityMarkerInfo(element, parent)
             } else if (element.textMatches(PsiKeyword.IF) && parent is PsiIfStatement) {
-                return getComplexityMarkerInfo(
-                    element,
-                    parent.thenBranch ?: return null,
-                    parent.condition ?: return null
-                )
+                return if (parent.elseBranch == null)
+                    getComplexityMarkerInfo(element, parent)
+                else
+                    getComplexityMarkerInfo(element, parent.condition ?: return null, parent.thenBranch ?: return null)
             } else if (element.textMatches(PsiKeyword.ELSE) && parent is PsiIfStatement && parent.elseBranch !is PsiIfStatement) {
                 return getComplexityMarkerInfo(element, parent.elseBranch ?: return null)
             }
@@ -42,17 +41,8 @@ abstract class AbstractComplexityLineMarker<T : JavaElementVisitor>(
         return null
     }
 
-    private fun <E : PsiElement, P : PsiElement> getComplexityMarkerInfo(
+    abstract fun <E : PsiElement, P : PsiElement> getComplexityMarkerInfo(
         elementToMark: E,
         vararg blocksToMeasure: P
-    ): LineMarkerInfo<*>? {
-        val visitor = visitorSupplier()
-        blocksToMeasure.forEach { visitor.visitElement(it) }
-        val complexity = visitor.complexityGetter()
-        return if (complexity == 1) {
-            null
-        } else {
-            ComplexityLineMarkerInfo(complexity, elementToMark)
-        }
-    }
+    ): LineMarkerInfo<*>?
 }
