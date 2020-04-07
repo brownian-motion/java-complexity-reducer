@@ -23,8 +23,8 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-//    version '201-EAP-SNAPSHOT'
-    version '2019.3'
+    version '201-EAP-SNAPSHOT'
+//    version '2019.3'
     plugins 'java'
 }
 compileKotlin {

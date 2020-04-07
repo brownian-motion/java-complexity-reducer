@@ -47,9 +47,9 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
         visit(statement.update)
         visit(statement.body)
 
-        val total = (childNodeComplexities.pop() // initializer stmt
+        val total = (childNodeComplexities.pop() - 1 // initializer (Treated as expr to match CheckStyle)
                 + childNodeComplexities.pop() // condition expr
-                + childNodeComplexities.pop() // update stmt
+                + childNodeComplexities.pop() - 1 // update (Treated as expr to match CheckStyle)
                 + childNodeComplexities.pop() // body
                 + 1) // do/don't enter for loop
         childNodeComplexities.push(total)
@@ -88,8 +88,9 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
 
 
     override fun visitConditionalExpression(expression: PsiConditionalExpression) {
-        expression.condition.accept(this)
-        expression.thenExpression?.accept(this) ?: childNodeComplexities.push(1)
+        visit(expression.condition)
+        visit(expression.thenExpression)
+        visit(expression.elseExpression)
 
         val total = (childNodeComplexities.pop() // condition
                 + childNodeComplexities.pop() // true branch
@@ -125,7 +126,7 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
                 pendingLabel = false
                 visit(child)
                 val branchTotal = (childNodeComplexities.pop() // last running total
-                        + childNodeComplexities.pop() // last statement we just visited
+                        * childNodeComplexities.pop() // last statement we just visited
                         )
                 childNodeComplexities.push(branchTotal)
             }
@@ -165,7 +166,7 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
                 pendingLabel = false
                 visit(child)
                 val branchTotal = (childNodeComplexities.pop() // last running total
-                        + childNodeComplexities.pop() // last statement we just visited
+                        * childNodeComplexities.pop() // last statement we just visited
                         )
                 childNodeComplexities.push(branchTotal)
             }
@@ -196,8 +197,61 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
         }
     }
 
+    override fun visitBinaryExpression(expression: PsiBinaryExpression?) {
+        visitExpressions(expression?.lOperand, expression?.rOperand)
+    }
+
+    override fun visitArrayAccessExpression(expression: PsiArrayAccessExpression?) {
+        visitExpressions(expression?.indexExpression, expression?.arrayExpression)
+    }
+
+    override fun visitAssignmentExpression(expression: PsiAssignmentExpression?) {
+        visitExpressions(expression?.lExpression, expression?.rExpression)
+    }
+
+    override fun visitPostfixExpression(expression: PsiPostfixExpression?) {
+        visit(expression?.operand)
+    }
+
+    override fun visitPrefixExpression(expression: PsiPrefixExpression?) {
+        visit(expression?.operand)
+    }
+
+    override fun visitExpressionList(list: PsiExpressionList?) {
+        visitExpressions(*list?.expressions ?: emptyArray())
+    }
+
+    override fun visitExpressionListStatement(statement: PsiExpressionListStatement?) {
+        visitExpressionList(statement?.expressionList)
+    }
+
+    override fun visitCallExpression(callExpression: PsiCallExpression?) {
+        visitExpressionList(callExpression?.argumentList)
+    }
+
+    override fun visitAssertStatement(statement: PsiAssertStatement?) {
+        // an assert is essentially if(condition) { description }, so treat it just like an if condition with no else:
+        visitExpressions(statement?.assertCondition, statement?.assertDescription)
+        childNodeComplexities.push(
+            1 + // do/don't fail assert
+                    childNodeComplexities.pop() + // condition
+                    childNodeComplexities.pop() // description
+        )
+    }
+
+    override fun visitReturnStatement(statement: PsiReturnStatement?) {
+        visit(statement?.returnValue)
+        childNodeComplexities.push(1 + childNodeComplexities.pop())
+    }
+
     override fun visitExpression(expression: PsiExpression?) {
         childNodeComplexities.push(0)
+    }
+
+    private fun visitExpressions(vararg expressions: PsiExpression?) {
+        var total = 0
+        expressions.forEach { visit(it); total += childNodeComplexities.pop() }
+        childNodeComplexities.push(total)
     }
 
     override fun visitBlockStatement(statement: PsiBlockStatement) {
