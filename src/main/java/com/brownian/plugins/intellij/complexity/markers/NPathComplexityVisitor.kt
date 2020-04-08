@@ -277,7 +277,12 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
     override fun visitTryStatement(statement: PsiTryStatement) {
         visitCodeBlock(statement.tryBlock)
         var total = childNodeComplexities.pop() // body
-        statement.catchBlocks.forEach { visitCodeBlock(it); total += childNodeComplexities.pop() } // add the complexities, because each catch is totally independent
+
+        // When leaving our try block, if we have N catch sections, then we have N+1 code paths out of the try.
+        var catchTotal = 1
+        statement.catchBlocks.forEach { visitCodeBlock(it); catchTotal += childNodeComplexities.pop() } // add the complexities, because each catch is totally independent
+        total *= catchTotal
+
         if (statement.finallyBlock != null) {
             visitCodeBlock(statement.finallyBlock)
             total *= childNodeComplexities.pop() // EVERY path goes through this sequentially, no matter what, so it multiplies
