@@ -195,4 +195,80 @@ internal class NPathComplexityVisitorTest : JavaCodeInsightFixtureTestCase() {
         testMethod.accept(visitor)
         assertEquals(2 * 3 * 4, visitor.complexity)
     }
+
+    fun test_treatsLambdasAsOpaqueValues_whichDoNotContributeComplexity() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /*
+                 * Loads the data
+                 */
+                public void getData(Bar[] bs)
+                {
+                    List<String> as = new LinkedList<>();
+                    for (Bar record : bs)
+                    {
+                        as.add(record.field("k"));
+                    }
+                    String[] ks = as.toArray(new String[0]);
+                    final Record bam = new Record();
+            
+                    //Get some data
+                    bam.setField("original ks", ks);
+                    bam.setField("floop", this.quux.floop().flip());
+                    bam.setField("flop", this.quux.flop().flip());
+                    //Use some data
+                    this.quux.getSource().foo("bar", bam, (baz, data, qux) ->
+                    {
+                        //Do stuff with data
+                        Record[] cs = baz.getData();
+                        List<Bar> ds = new LinkedList<>();
+                        for (Record r : cs)
+                        {
+                            Bar quum = new Bar();
+                            for (String k : r.fields())
+                            {
+                                quum.setField(k, r.field(k));
+                            }
+                            ds.add(quum);
+                        }
+                        clamBambler = ds.toArray(new Bar[0]);
+                        if (clamBambler != null && clamBambler.length > 1)
+                        {
+                            MyObject myObj = getMyObject();
+                            myObj.setData(clamBambler);
+                            this.add(myObj);
+            
+                            setClamBambler(clamBambler);
+            
+                            ObjectLabel e = new ObjectLabel("Label", this.quux.getSource().getFieldNames());
+                            this.quux.setLabel(e);
+                            this.add(this.quux);
+                            this.add(this.fu);
+            
+                            this.myComponent.setData();
+                            this.show();
+                        }
+                        else
+                        {
+                            Warner.warn("warning");
+                        }
+                    });
+                }
+            }
+            """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("getData", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(2, visitor.complexity)
+    }
+
+    public
 }

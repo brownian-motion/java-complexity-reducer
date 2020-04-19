@@ -36,6 +36,10 @@ abstract class AbstractComplexityLineMarker(
             } else if (element.textMatches(PsiKeyword.ELSE) && parent is PsiIfStatement && parent.elseBranch !is PsiIfStatement) {
                 return getComplexityMarkerInfo(element, parent.elseBranch ?: return null)
             }
+        } else if (parent is PsiLambdaExpression) {
+            if (element.textMatches("->")) {
+                return getComplexityMarkerInfo(parent.body ?: return null, parent)
+            }
         }
 
         return null
