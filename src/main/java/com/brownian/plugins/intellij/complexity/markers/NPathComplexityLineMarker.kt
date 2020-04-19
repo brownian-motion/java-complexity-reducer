@@ -18,7 +18,9 @@ class NPathComplexityLineMarker : AbstractComplexityLineMarker("NPath Complexity
             val visitor = NPathComplexityVisitor()
             var complexity = 0
             for (it in blocksToMeasure) {
-                visitor.reset(); it.accept(visitor); complexity += visitor.complexity
+                visitor.reset()
+                it.accept(visitor)
+                complexity += visitor.complexity ?: continue
             }
             if (complexity <= 1) {
                 null

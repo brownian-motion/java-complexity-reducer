@@ -291,8 +291,12 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
     }
 
     // Assumes that it is called after walking the tree, so the stack is size one!!
-    val complexity: Int
-        get() = childNodeComplexities.peek()
+    val complexity: Int?
+        get() = if (childNodeComplexities.empty()) {
+            null
+        } else {
+            childNodeComplexities.peek()
+        }
 
     fun reset() {
         childNodeComplexities = IntStack()
