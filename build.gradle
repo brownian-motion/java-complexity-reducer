@@ -7,7 +7,7 @@ plugins {
 apply plugin: "org.jetbrains.kotlin.jvm"
 
 group 'com.brownian.plugins.intellij.complexity-reducer'
-version '0.1.4a'
+version '0.1.4'
 
 repositories {
     mavenCentral()
@@ -34,6 +34,13 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
-     0.1.4a Added complexity for lambdas, to avoid situations where complexity is hidden in a method behind a super complex lambda
+     0.1.4
+     Added complexity reporting for lambdas, to avoid situations where complexity is hidden in a method behind a super complex lambda.
+     This complexity is shown on the lambda itself, but does not contribute to the complexity of the surrounding scope.
+     
+     Added labels to complexity markers to clarify which is cyclomatic and which is NPath.
+     Also fixed their order to be deterministic, left-to-right.
+     
+     Fixed incorrect NPath complexity calculation for ternary and (a || b) boolean expressions.
      """
 }
