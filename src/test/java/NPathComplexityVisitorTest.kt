@@ -168,19 +168,200 @@ internal class NPathComplexityVisitorTest : JavaCodeInsightFixtureTestCase() {
         assertEquals(12, visitor.complexity)
     }
 
-    fun test_ternaryIsSumOfCondAndBranches() {
+    fun test_simplestReturnExpressionStatement_isComplexity1() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return.
+                 * Expected complexity is 1.
+                 **/
+                public int returnTest() {
+                   return 1;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(1, visitor.complexity)
+    }
+
+    fun test_returnAndAndExpression_isComplexity2() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return of a boolean expression.
+                 * Expected complexity is 2.
+                 **/
+                public int returnTest() {
+                   return left && right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(2, visitor.complexity)
+    }
+
+    fun test_returnOrOrExpression_isComplexity2() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return of a boolean expression.
+                 * Expected complexity is 2.
+                 **/
+                public int returnTest() {
+                   return left || right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(2, visitor.complexity)
+    }
+
+    fun test_returnDoubleAndAndExpression_isComplexity3() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return of a boolean expression.
+                 * Expected complexity is 3.
+                 **/
+                public int returnTest() {
+                   return left && middle && right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(3, visitor.complexity)
+    }
+
+    fun test_returnDoubleOrOrExpression_isComplexity3() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return of a boolean expression.
+                 * Expected complexity is 3.
+                 **/
+                public int returnTest() {
+                   return left || middle || right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(3, visitor.complexity)
+    }
+
+    fun test_returnMixedAndAndOrOrExpression_isComplexity3() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return of a boolean expression.
+                 * Expected complexity is 3.
+                 **/
+                public int returnTest() {
+                   return left || middle && right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(3, visitor.complexity)
+    }
+
+    fun test_simplestReturnVoidStatement_isComplexity1() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple return.
+                 * Expected complexity is 1.
+                 **/
+                public void returnTest() {
+                   return;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("returnTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(1, visitor.complexity)
+    }
+
+    fun test_ternary_simplestTernary() {
         //language=JAVA
         myFixture.addClass(
             """
             public class NPathComplexityTest {
                 /**
                  * Just a simple ternary.
-                 * Expected complexity is (2) * (3 + 4) = 14
+                 * Expected complexity is 2
                  **/
                 public boolean simpleTernaryTest() {
-                    return (this && that) ? // 2
-                        ( a || b || c || d ) : // 3
-                        (a || b || c || d || e); // 4
+                    // 1 + (complexity of expression)
+                    return cond ? left : right;
                 }
             }
         """.trimIndent()
@@ -193,7 +374,140 @@ internal class NPathComplexityVisitorTest : JavaCodeInsightFixtureTestCase() {
 
         val visitor = NPathComplexityVisitor()
         testMethod.accept(visitor)
-        assertEquals(2 * 3 * 4, visitor.complexity)
+        assertEquals(2, visitor.complexity)
+    }
+
+    fun test_ternary_twoConditions_doublesComplexity_simplePaths() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple ternary.
+                 * Expected complexity is 3
+                 **/
+                public boolean simpleTernaryTest() {
+                    // 1 + (complexity of expression)
+                    return (cond1 || cond2) ? left : right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("simpleTernaryTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(4, visitor.complexity)
+    }
+
+    fun test_ternary_twoPathsInLeftBranch() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple ternary.
+                 * Expected complexity is 3
+                 **/
+                public boolean simpleTernaryTest() {
+                    // 1 + (complexity of expression)
+                    return cond ? (left1 && left2) : right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("simpleTernaryTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(3, visitor.complexity)
+    }
+
+    fun test_ternary_threePathsInRightBranch() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple ternary.
+                 * Expected complexity is 4
+                 **/
+                public boolean simpleTernaryTest() {
+                    // 1 + (complexity of expression)
+                    return cond ? left : (right1 || right2 || right3);
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("simpleTernaryTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(4, visitor.complexity)
+    }
+
+    fun test_ternary_twoPathsInBothBranches() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple ternary.
+                 * Expected complexity is (1) * (2 + 2) = 4
+                 **/
+                public boolean simpleTernaryTest() {
+                    return cond ? (left1 || left2) : (right1 && right2);
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("simpleTernaryTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(4, visitor.complexity)
+    }
+
+    fun test_ternary_twoPathsInLeft_andTwoInCondition() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /**
+                 * Just a simple ternary.
+                 * Expected complexity is (2) * (2 + 1) = 6
+                 **/
+                public boolean simpleTernaryTest() {
+                    return (cond1 && cond2) ? (left1 || left2) : right;
+                }
+            }
+        """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+        val testMethods = testClass.findMethodsByName("simpleTernaryTest", false)
+        assertEquals(1, testMethods.size)
+        val testMethod = testMethods.first()
+
+        val visitor = NPathComplexityVisitor()
+        testMethod.accept(visitor)
+        assertEquals(6, visitor.complexity)
     }
 
     fun test_treatsLambdasAsOpaqueValues_whichDoNotContributeComplexity() {
@@ -270,5 +584,74 @@ internal class NPathComplexityVisitorTest : JavaCodeInsightFixtureTestCase() {
         assertEquals(2, visitor.complexity)
     }
 
-    public
+    fun test_complexityOfClassIsNotDefined() {
+        //language=JAVA
+        myFixture.addClass(
+            """
+            public class NPathComplexityTest {
+                /*
+                 * Loads the data
+                 */
+                public void getData(Bar[] bs)
+                {
+                    List<String> as = new LinkedList<>();
+                    for (Bar record : bs)
+                    {
+                        as.add(record.field("k"));
+                    }
+                    String[] ks = as.toArray(new String[0]);
+                    final Record bam = new Record();
+            
+                    //Get some data
+                    bam.setField("original ks", ks);
+                    bam.setField("floop", this.quux.floop().flip());
+                    bam.setField("flop", this.quux.flop().flip());
+                    //Use some data
+                    this.quux.getSource().foo("bar", bam, (baz, data, qux) ->
+                    {
+                        //Do stuff with data
+                        Record[] cs = baz.getData();
+                        List<Bar> ds = new LinkedList<>();
+                        for (Record r : cs)
+                        {
+                            Bar quum = new Bar();
+                            for (String k : r.fields())
+                            {
+                                quum.setField(k, r.field(k));
+                            }
+                            ds.add(quum);
+                        }
+                        clamBambler = ds.toArray(new Bar[0]);
+                        if (clamBambler != null && clamBambler.length > 1)
+                        {
+                            MyObject myObj = getMyObject();
+                            myObj.setData(clamBambler);
+                            this.add(myObj);
+            
+                            setClamBambler(clamBambler);
+            
+                            ObjectLabel e = new ObjectLabel("Label", this.quux.getSource().getFieldNames());
+                            this.quux.setLabel(e);
+                            this.add(this.quux);
+                            this.add(this.fu);
+            
+                            this.myComponent.setData();
+                            this.show();
+                        }
+                        else
+                        {
+                            Warner.warn("warning");
+                        }
+                    });
+                }
+            }
+            """.trimIndent()
+        )
+
+        val testClass = myFixture.findClass("NPathComplexityTest")
+
+        val visitor = NPathComplexityVisitor()
+        testClass.accept(visitor)
+        assertNull(visitor.complexity)
+    }
 }

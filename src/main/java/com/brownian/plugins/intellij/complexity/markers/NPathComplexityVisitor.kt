@@ -92,10 +92,24 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
         visit(expression.thenExpression)
         visit(expression.elseExpression)
 
-        val total = (childNodeComplexities.pop() // condition
-                + childNodeComplexities.pop() // true branch
-                + childNodeComplexities.pop() // false branch
-                + 2) // two paths through
+        // return val; // statement has complexity 1
+        // if(cond) { return left; } else { return right; } // statement has complexity 2
+        // return cond ? left : right; // statement has complexity 2, so expression should have complexity 1
+
+        // if(cond) { return left1 || left2; } else { return right1 && right2 ; } // statement has complexity 4
+        // return cond ? (left1 || left2) : (right1 && right2); // statement should have equal complexity 4, so expression should have complexity 3
+
+        // if(cond1 || cond2) { return left1 || left2; } else { return right1 && right2 ; } // statement has complexity 8
+        // return (cond1 || cond2) ? (left1 || left2) : (right1 && right2); // statement should have equal complexity 8, so expression should have complexity 7
+
+        val total = (
+                (
+                        (1 + childNodeComplexities.pop()) // false branch,
+                                + (1 + childNodeComplexities.pop()) // true branch
+                        )
+                        * (1 + childNodeComplexities.pop()) // condition
+
+                ) - 1 // make this an expression. The simplest expression has complexity 0; the simplest ternary will have complexity 1
         childNodeComplexities.push(total)
     }
 
@@ -186,19 +200,34 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
         childNodeComplexities.push(total)
     }
 
-    override fun visitPolyadicExpression(expression: PsiPolyadicExpression) {
+    override fun visitPolyadicExpression(expression: PsiPolyadicExpression?) {
+        if (expression == null) {
+            childNodeComplexities.push(0)
+            return
+        }
         val token = expression.operationTokenType
         if (token == JavaTokenType.ANDAND || token == JavaTokenType.OROR) {
             var total = expression.operands.size - 1
             expression.operands.forEach { visit(it); total += childNodeComplexities.pop() }
             childNodeComplexities.push(total)
         } else {
-            childNodeComplexities.push(0)
+            visitExpressions(*expression.operands)
         }
     }
 
     override fun visitBinaryExpression(expression: PsiBinaryExpression?) {
-        visitExpressions(expression?.lOperand, expression?.rOperand)
+        if (expression == null) {
+            childNodeComplexities.push(0)
+            return
+        }
+        val token = expression.operationTokenType
+        if (token == JavaTokenType.ANDAND || token == JavaTokenType.OROR) {
+            var total = 1
+            expression.operands.forEach { visit(it); total += childNodeComplexities.pop() }
+            childNodeComplexities.push(total)
+        } else {
+            visitExpressions(expression.lOperand, expression.rOperand)
+        }
     }
 
     override fun visitArrayAccessExpression(expression: PsiArrayAccessExpression?) {
@@ -242,6 +271,10 @@ class NPathComplexityVisitor : JavaRecursiveElementWalkingVisitor() {
     override fun visitReturnStatement(statement: PsiReturnStatement?) {
         visit(statement?.returnValue)
         childNodeComplexities.push(1 + childNodeComplexities.pop())
+    }
+
+    override fun visitParenthesizedExpression(expression: PsiParenthesizedExpression?) {
+        visit(expression?.expression)
     }
 
     override fun visitExpression(expression: PsiExpression?) {
