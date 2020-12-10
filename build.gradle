@@ -1,13 +1,13 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.4.18'
-    id 'org.jetbrains.kotlin.jvm' version '1.3.71'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.0'
 }
 
 apply plugin: "org.jetbrains.kotlin.jvm"
 
 group 'com.brownian.plugins.intellij.complexity-reducer'
-version '0.1.4'
+version '0.1.6'
 
 repositories {
     mavenCentral()
@@ -23,7 +23,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2020.1'
+    version '2020.3'
     plugins 'java'
 }
 compileKotlin {
@@ -34,6 +34,9 @@ compileTestKotlin {
 }
 patchPluginXml {
     changeNotes """
+     0.1.6, 0.1.5
+     Small changes to rebuild for 2020.3 and 2020.1, respectively
+
      0.1.4
      Added complexity reporting for lambdas, to avoid situations where complexity is hidden in a method behind a super complex lambda.
      This complexity is shown on the lambda itself, but does not contribute to the complexity of the surrounding scope.
