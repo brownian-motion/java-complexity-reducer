@@ -20,7 +20,8 @@ public class ComplexityLineMarkerInfo<T extends PsiElement> extends LineMarkerIn
                 getIcon(complexity),
                 ignored -> String.format("%s: %d", complexityType, complexity),
                 null,
-                GutterIconRenderer.Alignment.CENTER
+                GutterIconRenderer.Alignment.CENTER,
+                () -> String.format("%s = %d", complexityType, complexity)
         );
     }
 

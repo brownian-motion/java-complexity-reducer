@@ -7,7 +7,7 @@ plugins {
 apply plugin: "org.jetbrains.kotlin.jvm"
 
 group 'com.brownian.plugins.intellij.complexity-reducer'
-version '0.1.5'
+version '0.1.7'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -29,6 +29,10 @@ patchPluginXml {
     version = project.version
     sinceBuild = '213.6777.52'
     untilBuild = '213.*'
+    changeNotes = """
+        0.1.7 fixed deprecated endpoints used in implementation
+        0.1.5 updated build system and dependencies
+    """
 }
 
 compileKotlin {
