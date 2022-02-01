@@ -1,2 +1,13 @@
-rootProject.name = 'complexity-reducer'
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+        gradlePluginPortal()
+        maven {
+            url 'https://www.jetbrains.com/intellij-repository/snapshots'
+        }
+    }
+}
 
+rootProject.name = 'complexity-reducer'
