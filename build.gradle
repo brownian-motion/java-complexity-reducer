@@ -1,13 +1,13 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '1.3.1'
+    id 'org.jetbrains.intellij' version '1.15.0'
     id 'org.jetbrains.kotlin.jvm' version '1.6.10'
 }
 
 apply plugin: "org.jetbrains.kotlin.jvm"
 
 group 'com.brownian.plugins.intellij.complexity-reducer'
-version '0.1.7'
+version '0.1.8'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -28,7 +28,7 @@ intellij {
 patchPluginXml {
     version = project.version
     sinceBuild = '213.6777.52'
-    untilBuild = '213.*'
+    untilBuild = '232.*'
     changeNotes = """
         0.1.7 fixed deprecated endpoints used in implementation
         0.1.5 updated build system and dependencies
